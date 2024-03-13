@@ -41,6 +41,3 @@ class Translator:
 	def translate(self, text, from_lang, to_lang):
 		raise NotImplementedError("This method should be overridden by inheriting classes")
 
-	def initialize(self):
-		# This method can be overridden by inheriting classes to perform additional setup
-		pass

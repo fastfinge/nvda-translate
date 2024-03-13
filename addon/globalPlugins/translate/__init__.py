@@ -6,7 +6,7 @@
 #See the file LICENSE for more details.
 #This add-on also uses the following external libraries:
 #markupbase, htmlentitydefs, HTMLParser: Come from the Python standard installation.
-#deepl-python: MIT License
+#deepl-python, googletrans: MIT License
 # langdetect and six: for language detection on the local machine
 
 import os, sys, time, codecs, re
@@ -26,9 +26,9 @@ logHandler.log.info("Importing modules from %s" % curDir)
 sys.path.insert(0, curDir)
 sys.path.insert(0, os.path.join(curDir, "html"))
 import markupbase
-import deepl
 import addonHandler, languageHandler
 from langdetect import detect
+import pkgutil
 
 addonHandler.initTranslation()
 #
@@ -45,35 +45,33 @@ _lastTranslatedText = None
 _lastTranslatedTextTime = 0
 _targetlang = "auto"
 
-if config.conf.get('translate') is not None:
-	_authKey = config.conf['translate'].get('apikey')
-	_targetlang = config.conf['translate'].get('targetlang')
-else:
-	_authKey = ""
-
 class TranslateSettings(SettingsPanel):
-	# Translators: This is the label for the IBMTTS settings category in NVDA Settings screen.
+	# Translators: This is the label for the Translate category in NVDA Settings screen.
 	title = _("Translate")
 
 	def makeSettings(self, settingsSizer):
 		sHelper = gui.guiHelper.BoxSizerHelper(self, sizer=settingsSizer)
-		self._apikey  = sHelper.addLabeledControl(_("Deepl API key:"), wx.TextCtrl)
+		self._service = sHelper.addLabeledControl(_("Translation Service:"), wx.Choice)
+		self._apikey  = sHelper.addLabeledControl(_("Translation API key:"), wx.TextCtrl)
 		self._langtarget = sHelper.addLabeledControl(_("Target language code:"), wx.Choice)
+		self._serviceurl = sHelper.addLabeledControl(_("Translation Server URL:"), wx.TextCtrl)
 		self._langtarget.Append("Auto")
-		if config.conf.get('translate') is not None:
-			self._apikey.SetValue(config.conf['translate'].get('apikey'))
-			# This combobox is used to select the language to translate to. It is filled with the list of languages supported by Deepl.
-			try:
-				for lang in _translator.get_target_languages():
-					self._langtarget.Append(lang.code)
-			except Exception as e:
-				self._langtarget.Append(config.conf['translate'].get('targetlang', 'auto'))
-			if config.conf['translate'].get('targetlang') is not None:
-				self._langtarget.SetStringSelection(config.conf['translate'].get('targetlang', 'auto'))
-			else:
-				self._langtarget.SetStringSelection("auto")
-		else:
-			self._apikey.SetValue("")
+		self._service.Append("None")
+		# Populate the combo box with the supported languages.
+		try:
+			for lang in _translator.supported_languages():
+				self._langtarget.Append(lang.code)
+		except Exception as e:
+			self._langtarget.Append(config.conf['translate'].get('targetlang', 'auto'))
+		# populate the service combo box with the available services.
+		ServiceDir = os.path.abspath(os.path.dirname(__file__)) + "\\services"
+		all_services = [x for x in pkgutil.iter_modules(path=ServiceDir)]
+		for service in all_services:
+			self._service.Append(service.name)
+		self._langtarget.SetStringSelection(config.conf['translate'].get('targetlang', 'auto'))
+		self._apikey.SetValue(config.conf['translate'].get('apikey', 'none'))
+		self._service.setStringSelection(config.conf['translate'].get('service', None))
+		
 
 	def onSave(self):
 		global _authKey, _translator, _targetlang
