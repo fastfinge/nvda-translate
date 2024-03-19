@@ -114,14 +114,17 @@ Stores the result into the cache so that the same translation does not asks deep
 				inlang = "zz"
 			if inlang == "zz":
 				translated = text	
-			elif _targetlang == "Auto" and inlang != _gpObject.language:
-				translatedRes = _translator.translate_text(prepared, target_lang=_gpObject.language, context=appcontext, split_sentences="nonewlines", preserve_formatting=True)
-				translated = translatedRes.text
-			elif inlang != _targetlang:
-				translatedRes = _translator.translate_text(prepared, target_lang=_targetlang, context=appcontext, split_sentences="nonewlines", preserve_formatting=True)
-				translated = translatedRes.text
 			else:
-				translated = text
+				targetlang = _gpObject.language if _targetlang == 'Auto' else _targetlang
+				# langdetect may not include a country code, we don't want to mismatch if that's the case
+				# E.G. EN vs. EN-US
+				dashpos = targetlang.find('-')
+				targetlang2 = targetlang if dashpos < 0 else targetlang[:dashpos]
+				if inlang != targetlang and inlang != targetlang2:
+					translatedRes = _translator.translate_text(prepared, target_lang=_targetlang, context=appcontext, split_sentences="nonewlines", preserve_formatting=True)
+					translated = translatedRes.text
+				else:
+					translated = text
 		else:
 			ui.message(_("You must place an API key in settings before translation."))
 
