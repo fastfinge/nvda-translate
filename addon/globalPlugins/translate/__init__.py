@@ -83,7 +83,7 @@ class TranslateSettings(SettingsPanel):
 		config.conf['translate']['targetlang'] = self._langtarget.GetStringSelection()
 		_targetlang = self._langtarget.GetStringSelection()
 		_translator = ""
-		_translator = deepl.Translator(_authKey).set_app_info("NVDA-translate", "2024-03-12")
+		_translator = deepl.Translator(_authKey).set_app_info("NVDA-translate", "2024-03-11")
 
 def translate(text, appcontext):
 	"""translates the given text to the desired language.
@@ -368,11 +368,15 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				self.language = languageHandler.getWindowsLanguage().replace("_", "-")
 			except:
 				self.language = 'en-us'
-		_targetlang = 	_targetlang = config.conf['translate'].get('targetlang', 'auto')
-		if config.conf['translate'].get('apikey') is not None:
-		  _translator = deepl.Translator(_authKey).set_app_info("NVDA-translate", "2024-03-12")
+		if 'translate' in config.conf:
+			_targetlang = config.conf['translate'].get('targetlang', 'auto')
 		else:
-		  logHandler.log.error("Please give an API key in the configuration.")
+			_targetlang = 'auto'
+		if 'translate' in config.conf:
+			if config.conf['translate'].get('apikey') is not None:
+				_translator = deepl.Translator(_authKey).set_app_info("NVDA-translate", "2024-03-11")
+			else:
+				logHandler.log.error("Please give an API key in the configuration.")
 		config.conf.spec['translate'] = {"apikey": "string(default='none')",}
 		gui.settingsDialogs.NVDASettingsDialog.categoryClasses.append(TranslateSettings)
 		import addonHandler
