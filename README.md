@@ -1,3 +1,10 @@
+# This addon is depricated! 
+
+This addon is now depricated. There will be no future updates, and I do not recommend using it.  Instead, you should use Advanced Translate:
+https://github.com/hxebolax/TranslateAdvanced/
+
+The interface is available in English, and it is much more advanced, and the code is much better.  It allows you to continue to use DeepL, and has every feature that exists in this addon.
+
 # nvda-translate with DeepL
 Make NVDA translate any spoken text to the desired language using DeepL. This addon is based largely on the excellent work of Yannick Plassiard.  While the addon is perfectly functional, I am a hobbiest programmer making things that I need for myself. Major code cleanup is needed.
 
